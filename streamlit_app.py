@@ -1,6 +1,6 @@
 """
 OnePulse - Beautiful Social Media Scheduler
-Professional UI with dark/light mode, cards, and animations
+With platform logos and innovative app icon
 """
 
 import streamlit as st
@@ -14,32 +14,70 @@ if len(sys.argv) > 1 and sys.argv[1] == "health":
     print("OK")
     sys.exit(0)
 
-st.set_page_config(page_title="OnePulse | Content Scheduler", page_icon="🚀", layout="wide", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="OnePulse | Content Scheduler", page_icon="⚡🚀", layout="wide", initial_sidebar_state="collapsed")
 
 # ============================================
-# CUSTOM CSS FOR BEAUTIFUL UI
+# CUSTOM CSS WITH LOGO STYLES
 # ============================================
 def inject_css(theme):
     if theme == "dark":
         st.markdown("""
         <style>
-        /* Dark Theme */
+        @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
         .stApp {
             background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2e 100%);
         }
-        .main-title {
+        .logo-container {
+            text-align: center;
+            font-size: 4rem;
+            filter: drop-shadow(0 0 10px #e94560);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+        .app-title {
             text-align: center;
             background: linear-gradient(135deg, #e94560, #0f3460);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             font-size: 3rem;
             font-weight: 800;
-            margin-bottom: 0;
+            margin-top: -0.5rem;
         }
         .subtitle {
             text-align: center;
             color: #aaa;
             margin-bottom: 2rem;
+        }
+        .platform-btn {
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 0.75rem;
+            border-radius: 40px;
+            transition: all 0.3s;
+            cursor: pointer;
+            text-align: center;
+        }
+        .youtube-active {
+            background: #FF0000;
+            color: white;
+            box-shadow: 0 4px 15px rgba(255,0,0,0.3);
+        }
+        .youtube-inactive {
+            background: rgba(255,0,0,0.2);
+            color: #FF0000;
+        }
+        .instagram-active {
+            background: linear-gradient(135deg, #f09433, #d62976, #962fbf, #4f5bd5);
+            color: white;
+            box-shadow: 0 4px 15px rgba(214,41,118,0.3);
+        }
+        .instagram-inactive {
+            background: rgba(214,41,118,0.2);
+            color: #d62976;
         }
         .card {
             background: rgba(30, 30, 60, 0.6);
@@ -93,26 +131,6 @@ def inject_css(theme):
             background: rgba(233,69,96,0.05);
             margin-bottom: 1rem;
         }
-        .platform-tab {
-            padding: 0.75rem;
-            text-align: center;
-            border-radius: 40px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .platform-active {
-            background: linear-gradient(135deg, #e94560, #0f3460);
-            color: white;
-            box-shadow: 0 4px 15px rgba(233,69,96,0.3);
-        }
-        .platform-inactive {
-            background: rgba(255,255,255,0.1);
-            color: #aaa;
-        }
-        .platform-inactive:hover {
-            background: rgba(255,255,255,0.2);
-        }
         hr {
             border-color: rgba(255,255,255,0.1);
         }
@@ -121,23 +139,63 @@ def inject_css(theme):
     else:
         st.markdown("""
         <style>
-        /* Light Theme */
+        @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css');
         .stApp {
             background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
         }
-        .main-title {
+        .logo-container {
+            text-align: center;
+            font-size: 4rem;
+            filter: drop-shadow(0 0 5px #667eea);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.8; }
+        }
+        .app-title {
             text-align: center;
             background: linear-gradient(135deg, #667eea, #764ba2);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             font-size: 3rem;
             font-weight: 800;
-            margin-bottom: 0;
+            margin-top: -0.5rem;
         }
         .subtitle {
             text-align: center;
             color: #666;
             margin-bottom: 2rem;
+        }
+        .platform-btn {
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 0.75rem;
+            border-radius: 40px;
+            transition: all 0.3s;
+            cursor: pointer;
+            text-align: center;
+        }
+        .youtube-active {
+            background: #FF0000;
+            color: white;
+            box-shadow: 0 4px 15px rgba(255,0,0,0.3);
+        }
+        .youtube-inactive {
+            background: rgba(255,0,0,0.1);
+            color: #FF0000;
+            border: 1px solid #FF0000;
+        }
+        .instagram-active {
+            background: linear-gradient(135deg, #f09433, #d62976, #962fbf, #4f5bd5);
+            color: white;
+            box-shadow: 0 4px 15px rgba(214,41,118,0.3);
+        }
+        .instagram-inactive {
+            background: rgba(214,41,118,0.1);
+            color: #d62976;
+            border: 1px solid #d62976;
         }
         .card {
             background: white;
@@ -164,9 +222,6 @@ def inject_css(theme):
             font-weight: bold;
             color: #667eea;
         }
-        .badge-scheduled { background: #ffc107; color: #333; }
-        .badge-posted { background: #4caf50; color: white; }
-        .badge-failed { background: #f44336; color: white; }
         .best-time-card {
             background: linear-gradient(135deg, #667eea, #764ba2);
             border-radius: 15px;
@@ -184,72 +239,42 @@ def inject_css(theme):
             background: rgba(102,126,234,0.05);
             margin-bottom: 1rem;
         }
-        .platform-tab {
-            padding: 0.75rem;
-            text-align: center;
-            border-radius: 40px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        .platform-active {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
-            box-shadow: 0 4px 15px rgba(102,126,234,0.3);
-        }
-        .platform-inactive {
-            background: #e0e0e0;
-            color: #666;
-        }
-        .platform-inactive:hover {
-            background: #d0d0d0;
-        }
         </style>
         """, unsafe_allow_html=True)
 
 # ============================================
-# AI MODEL
+# AI MODEL (same as before, but kept concise)
 # ============================================
 @st.cache_resource
 def get_ai_model():
+    class OnePulseAI:
+        BEST_HOURS = {"YouTube": {"general": [14,15,16,18,19,20,21]}, "Instagram": {"general": [7,8,9,11,12,17,18,19,20,21]}}
+        CAPTION_TEMPLATES = {"YouTube": ["🎬 {title}\n\n{description}\n\n🔥 Don't forget to like & subscribe!"], "Instagram": ["✨ {title}\n\n{description}\n\n❤️ Double tap if you agree!"]}
+        HASHTAG_BANKS = {"YouTube": {"general": ["#YouTube", "#Viral", "#Trending", "#Subscribe", "#Creator"]}, "Instagram": {"general": ["#Instagram", "#InstaGood", "#Explore", "#Reels", "#Viral"]}}
+        @classmethod
+        def generate_caption(cls, platform, title, description, niche="general"):
+            import random
+            template = random.choice(cls.CAPTION_TEMPLATES.get(platform, cls.CAPTION_TEMPLATES["Instagram"]))
+            return template.format(title=title or "My Post", description=description or "")
+        @classmethod
+        def generate_hashtags(cls, platform, niche="general", count=8):
+            import random
+            tags = cls.HASHTAG_BANKS.get(platform, {}).get("general", [])
+            random.shuffle(tags)
+            return tags[:count]
+        @classmethod
+        def get_best_times(cls, platform, niche="general", days_ahead=5):
+            from datetime import datetime, timedelta
+            import random
+            times = []
+            for d in range(1, days_ahead+1):
+                for h in cls.BEST_HOURS.get(platform, {}).get("general", [12,18])[:3]:
+                    dt = datetime.now() + timedelta(days=d)
+                    dt = dt.replace(hour=h, minute=random.choice([0,15,30]), second=0)
+                    times.append({"datetime": dt, "score": random.randint(70,98), "label": dt.strftime("%A, %b %d at %I:%M %p")})
+            times.sort(key=lambda x: x['score'], reverse=True)
+            return times[:6]
     return OnePulseAI()
-
-class OnePulseAI:
-    BEST_HOURS = {
-        "YouTube": {"general": [14,15,16,18,19,20,21]},
-        "Instagram": {"general": [7,8,9,11,12,17,18,19,20,21]}
-    }
-    CAPTION_TEMPLATES = {
-        "YouTube": ["🎬 {title}\n\n{description}\n\n🔥 Don't forget to like & subscribe!"],
-        "Instagram": ["✨ {title}\n\n{description}\n\n❤️ Double tap if you agree!"]
-    }
-    HASHTAG_BANKS = {
-        "YouTube": {"general": ["#YouTube", "#Viral", "#Trending", "#Subscribe", "#Creator"]},
-        "Instagram": {"general": ["#Instagram", "#InstaGood", "#Explore", "#Reels", "#Viral"]}
-    }
-    @classmethod
-    def generate_caption(cls, platform, title, description, niche="general"):
-        template = random.choice(cls.CAPTION_TEMPLATES.get(platform, cls.CAPTION_TEMPLATES["Instagram"]))
-        return template.format(title=title or "My Post", description=description or "")
-    @classmethod
-    def generate_hashtags(cls, platform, niche="general", count=8):
-        tags = cls.HASHTAG_BANKS.get(platform, {}).get("general", [])
-        random.shuffle(tags)
-        return tags[:count]
-    @classmethod
-    def get_best_times(cls, platform, niche="general", days_ahead=5):
-        times = []
-        for d in range(1, days_ahead+1):
-            for h in cls.BEST_HOURS.get(platform, {}).get("general", [12,18])[:3]:
-                dt = datetime.now() + timedelta(days=d)
-                dt = dt.replace(hour=h, minute=random.choice([0,15,30]), second=0)
-                times.append({
-                    "datetime": dt,
-                    "score": random.randint(70,98),
-                    "label": dt.strftime("%A, %b %d at %I:%M %p")
-                })
-        times.sort(key=lambda x: x['score'], reverse=True)
-        return times[:6]
 
 ai_model = get_ai_model()
 
@@ -267,20 +292,39 @@ if 'uploaded_file_data' not in st.session_state: st.session_state.uploaded_file_
 if 'uploaded_file_name' not in st.session_state: st.session_state.uploaded_file_name = ""
 
 # ============================================
-# HEADER & THEME TOGGLE
+# HEADER WITH INNOVATIVE LOGO
 # ============================================
 def render_header():
-    col1, col2, col3 = st.columns([1, 3, 1])
+    col1, col2, col3 = st.columns([1, 2, 1])
     with col1:
-        st.markdown('<div style="font-size: 3rem;">🚀</div>', unsafe_allow_html=True)
+        st.markdown("""<div class="logo-container">⚡🚀💜</div>""", unsafe_allow_html=True)
     with col2:
-        st.markdown('<h1 class="main-title">⚡ OnePulse</h1>', unsafe_allow_html=True)
-        st.markdown('<p class="subtitle">Schedule & Automate Your Social Media Content</p>', unsafe_allow_html=True)
+        st.markdown('<h1 class="app-title">OnePulse</h1>', unsafe_allow_html=True)
+        st.markdown('<p class="subtitle">AI-Powered Social Media Scheduling</p>', unsafe_allow_html=True)
     with col3:
         theme_label = "🌙 Dark" if st.session_state.theme == "dark" else "☀️ Light"
         if st.button(theme_label, key="theme_toggle"):
             st.session_state.theme = "light" if st.session_state.theme == "dark" else "dark"
             st.rerun()
+
+# ============================================
+# PLATFORM BUTTONS WITH LOGOS
+# ============================================
+def render_platform_tabs():
+    col1, col2 = st.columns(2)
+    with col1:
+        active = (st.session_state.selected_platform == "YouTube")
+        btn_class = "youtube-active" if active else "youtube-inactive"
+        if st.button(f"▶️ YouTube", key="yt_tab", use_container_width=True):
+            st.session_state.selected_platform = "YouTube"
+            st.rerun()
+    with col2:
+        active = (st.session_state.selected_platform == "Instagram")
+        btn_class = "instagram-active" if active else "instagram-inactive"
+        if st.button(f"📸 Instagram", key="ig_tab", use_container_width=True):
+            st.session_state.selected_platform = "Instagram"
+            st.rerun()
+    st.markdown("---")
 
 # ============================================
 # STATS CARDS
@@ -291,46 +335,23 @@ def render_stats():
     scheduled = len([p for p in platform_posts if p.get('status') == 'scheduled'])
     posted = len([p for p in platform_posts if p.get('status') == 'posted'])
     failed = len([p for p in platform_posts if p.get('status') == 'failed'])
-    
     col1, col2, col3, col4 = st.columns(4)
-    with col1:
-        st.markdown(f'<div class="stat-card"><div class="stat-number">{total}</div><div>📊 TOTAL</div></div>', unsafe_allow_html=True)
-    with col2:
-        st.markdown(f'<div class="stat-card"><div class="stat-number">{scheduled}</div><div>⏰ SCHEDULED</div></div>', unsafe_allow_html=True)
-    with col3:
-        st.markdown(f'<div class="stat-card"><div class="stat-number">{posted}</div><div>✅ POSTED</div></div>', unsafe_allow_html=True)
-    with col4:
-        st.markdown(f'<div class="stat-card"><div class="stat-number">{failed}</div><div>❌ FAILED</div></div>', unsafe_allow_html=True)
+    with col1: st.markdown(f'<div class="stat-card"><div class="stat-number">{total}</div><div>📊 TOTAL</div></div>', unsafe_allow_html=True)
+    with col2: st.markdown(f'<div class="stat-card"><div class="stat-number">{scheduled}</div><div>⏰ SCHEDULED</div></div>', unsafe_allow_html=True)
+    with col3: st.markdown(f'<div class="stat-card"><div class="stat-number">{posted}</div><div>✅ POSTED</div></div>', unsafe_allow_html=True)
+    with col4: st.markdown(f'<div class="stat-card"><div class="stat-number">{failed}</div><div>❌ FAILED</div></div>', unsafe_allow_html=True)
 
 # ============================================
-# PLATFORM TABS
-# ============================================
-def render_platform_tabs():
-    col1, col2 = st.columns(2)
-    with col1:
-        active = st.session_state.selected_platform == "YouTube"
-        if st.button("📺 YouTube", key="yt_tab", use_container_width=True):
-            st.session_state.selected_platform = "YouTube"
-            st.rerun()
-    with col2:
-        if st.button("📸 Instagram", key="ig_tab", use_container_width=True):
-            st.session_state.selected_platform = "Instagram"
-            st.rerun()
-    st.markdown("---")
-
-# ============================================
-# MAIN FORM
+# MAIN FORM (condensed but complete)
 # ============================================
 def render_schedule_form():
     platform = st.session_state.selected_platform
     st.markdown(f'<div class="card"><h3>📝 New Scheduled Post - {platform}</h3>', unsafe_allow_html=True)
-    
     col1, col2 = st.columns(2)
     with col1:
-        niche = st.selectbox("🎯 Niches", ["General", "Tech", "Lifestyle", "Fitness", "Food", "Art"])
+        niche = st.selectbox("🎯 Niche", ["General", "Tech", "Lifestyle", "Fitness", "Food", "Art"])
         title = st.text_input("📌 Title", placeholder="Enter post title...")
         description = st.text_area("💬 Description", placeholder="What's this post about?", height=100)
-    
     with col2:
         st.markdown('<div class="upload-area">', unsafe_allow_html=True)
         uploaded = st.file_uploader("📎 Media File (any format)", type=None, label_visibility="collapsed")
@@ -342,8 +363,6 @@ def render_schedule_form():
             st.caption("Drop or click to upload images, videos, audio, or documents")
         st.markdown('</div>', unsafe_allow_html=True)
         media_url = st.text_input("🔗 Or paste URL", placeholder="https://...")
-    
-    # AI Generation
     st.markdown("### 🤖 AI Content Generation")
     if st.button("✨ Generate AI Captions, Hashtags & Best Times", use_container_width=True):
         with st.spinner("AI is analyzing..."):
@@ -353,7 +372,6 @@ def render_schedule_form():
             st.session_state.show_ai_suggestions = True
             st.success("✅ AI generation complete!")
             st.rerun()
-    
     if st.session_state.show_ai_suggestions:
         st.markdown("### ✨ AI Recommendations")
         col_a, col_b, col_c = st.columns([2,1,1.5])
@@ -375,30 +393,20 @@ def render_schedule_form():
             for t in st.session_state.best_times[:4]:
                 st.markdown(f'<div class="best-time-card">📅 {t["label"]}<br>🔥 {t["score"]}% engagement</div>', unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
-    
     caption = st.text_area("📝 Caption (override)", value=st.session_state.generated_caption if st.session_state.show_ai_suggestions else "", height=100)
     hashtags = st.text_input("#️⃣ Hashtags", value=" ".join(st.session_state.generated_hashtags) if st.session_state.show_ai_suggestions else "")
-    
     st.markdown("### 🗓️ Schedule Time")
     col_d, col_e = st.columns(2)
-    with col_d:
-        schedule_date = st.date_input("Date", datetime.now(), min_value=datetime.now().date())
-    with col_e:
-        schedule_time = st.time_input("Time", datetime.now().time())
-    
+    with col_d: schedule_date = st.date_input("Date", datetime.now(), min_value=datetime.now().date())
+    with col_e: schedule_time = st.time_input("Time", datetime.now().time())
     if st.button("💾 Schedule Post", type="primary", use_container_width=True):
         if title.strip():
             scheduled = datetime.combine(schedule_date, schedule_time)
             st.session_state.posts.append({
-                "platform": platform,
-                "title": title,
-                "description": description,
-                "caption": caption,
-                "hashtags": hashtags,
+                "platform": platform, "title": title, "description": description,
+                "caption": caption, "hashtags": hashtags,
                 "media": st.session_state.uploaded_file_name or media_url,
-                "scheduled_time": scheduled,
-                "status": "scheduled",
-                "created_at": datetime.now()
+                "scheduled_time": scheduled, "status": "scheduled", "created_at": datetime.now()
             })
             st.success(f"✅ Post '{title}' scheduled for {scheduled.strftime('%b %d, %I:%M %p')}!")
             st.balloons()
@@ -409,7 +417,6 @@ def render_schedule_form():
             st.rerun()
         else:
             st.error("❌ Please enter a title")
-    
     st.markdown('</div>', unsafe_allow_html=True)
 
 # ============================================
@@ -432,9 +439,7 @@ def render_posts():
                     <div><strong>{post['title']}</strong><br><small>{time_str}</small></div>
                     <div><span class="badge {badge_class}">{post['status'].upper()}</span></div>
                 </div>
-                <div style="margin-top: 0.5rem;">
-                    <small>{post.get('description', '')[:80]}...</small>
-                </div>
+                <div style="margin-top: 0.5rem;"><small>{post.get('description', '')[:80]}...</small></div>
             </div>
             """, unsafe_allow_html=True)
             if post['status'] == 'scheduled':
@@ -449,7 +454,7 @@ def render_posts():
     st.markdown('</div>', unsafe_allow_html=True)
 
 # ============================================
-# ANALYTICS (lazy load plotly)
+# ANALYTICS
 # ============================================
 def render_analytics():
     import plotly.express as px
@@ -457,22 +462,16 @@ def render_analytics():
     if not st.session_state.posts:
         st.info("No data available. Create posts to see analytics.")
         return
-    df = pd.DataFrame([{
-        'Platform': p['platform'],
-        'Status': p['status'],
-        'Niche': p.get('niche', 'General'),
-        'Title': p['title'][:20]
-    } for p in st.session_state.posts])
-    
+    df = pd.DataFrame([{'Platform': p['platform'], 'Status': p['status'], 'Niche': p.get('niche', 'General')} for p in st.session_state.posts])
     col1, col2 = st.columns(2)
     with col1:
         status_counts = df['Status'].value_counts()
-        fig1 = px.pie(values=status_counts.values, names=status_counts.index, title="Post Status", color_discrete_sequence=['#4CAF50','#FFC107','#F44336'])
-        st.plotly_chart(fig1, use_container_width=True)
+        fig = px.pie(values=status_counts.values, names=status_counts.index, title="Post Status", color_discrete_sequence=['#4CAF50','#FFC107','#F44336'])
+        st.plotly_chart(fig, use_container_width=True)
     with col2:
         platform_counts = df['Platform'].value_counts()
-        fig2 = px.bar(x=platform_counts.index, y=platform_counts.values, title="Posts by Platform", color=platform_counts.index)
-        st.plotly_chart(fig2, use_container_width=True)
+        fig = px.bar(x=platform_counts.index, y=platform_counts.values, title="Posts by Platform", color=platform_counts.index)
+        st.plotly_chart(fig, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 # ============================================
@@ -501,29 +500,22 @@ def render_ai_assistant():
     st.markdown('</div>', unsafe_allow_html=True)
 
 # ============================================
-# MAIN APP
+# MAIN
 # ============================================
 def main():
     inject_css(st.session_state.theme)
     render_header()
     render_platform_tabs()
     render_stats()
-    
     menu = st.radio("", ["📝 Create Post", "📋 View Posts", "📊 Analytics", "🤖 AI Assistant"], horizontal=True, label_visibility="collapsed")
     st.markdown("---")
-    
     if menu == "📝 Create Post":
-        col_left, col_right = st.columns([2, 1])
-        with col_left:
-            render_schedule_form()
-        with col_right:
-            render_posts()
-    elif menu == "📋 View Posts":
-        render_posts()
-    elif menu == "📊 Analytics":
-        render_analytics()
-    else:
-        render_ai_assistant()
+        col_left, col_right = st.columns([2,1])
+        with col_left: render_schedule_form()
+        with col_right: render_posts()
+    elif menu == "📋 View Posts": render_posts()
+    elif menu == "📊 Analytics": render_analytics()
+    else: render_ai_assistant()
 
 if __name__ == "__main__":
     main()
