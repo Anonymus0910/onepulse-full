@@ -9,6 +9,7 @@ from datetime import datetime, timedelta
 import random
 import sys
 import calendar as cal_mod
+from streamlit_autorefresh import st_autorefresh
 
 # Health check
 if len(sys.argv) > 1 and sys.argv[1] == "health":
@@ -40,6 +41,10 @@ def inject_css(theme):
         .stat-number { font-size: 2.2rem; font-weight: bold; color: #e94560; }
         .best-time-card { background: linear-gradient(135deg, #e94560, #0f3460); border-radius: 15px; padding: 0.75rem; margin: 0.5rem 0; text-align: center; color: white; font-weight: bold; }
         .upload-area { border: 2px dashed #e94560; border-radius: 15px; padding: 1rem; text-align: center; background: rgba(233,69,96,0.05); margin-bottom: 1rem; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .badge-scheduled { background: #ffc107; color: #1a1a2e; }
+        .badge-posted { background: #4caf50; color: white; }
+        .badge-failed { background: #f44336; color: white; }
         </style>
         """, unsafe_allow_html=True)
     else:
@@ -61,6 +66,10 @@ def inject_css(theme):
         .stat-number { font-size: 2.2rem; font-weight: bold; color: #667eea; }
         .best-time-card { background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 15px; padding: 0.75rem; margin: 0.5rem 0; text-align: center; color: white; font-weight: bold; }
         .upload-area { border: 2px dashed #667eea; border-radius: 15px; padding: 1rem; text-align: center; background: rgba(102,126,234,0.05); margin-bottom: 1rem; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .badge-scheduled { background: #ffc107; color: #333; }
+        .badge-posted { background: #4caf50; color: white; }
+        .badge-failed { background: #f44336; color: white; }
         </style>
         """, unsafe_allow_html=True)
 
@@ -123,17 +132,24 @@ if 'selected_minute' not in st.session_state: st.session_state.selected_minute =
 if 'selected_ampm' not in st.session_state: st.session_state.selected_ampm = "AM"
 
 # ============================================
-# BUG FIX: CHECK & UPDATE POST STATUSES
+# ✅ FIX 1: STATUS CHECKER FUNCTION
+# Checks all scheduled posts and updates to "posted" if time has passed
 # ============================================
 def check_and_update_posts():
+    """Check all scheduled posts and update status to 'posted' if scheduled_time <= now"""
     now = datetime.now()
-    changed = False
+    updated_count = 0
+    
     for post in st.session_state.posts:
         if post.get('status') == 'scheduled' and post.get('scheduled_time'):
             if post['scheduled_time'] <= now:
                 post['status'] = 'posted'
-                changed = True
-    return changed
+                updated_count += 1
+    
+    if updated_count > 0:
+        # Return True so we can show a message if needed
+        return True
+    return False
 
 # ============================================
 # HEADER & PLATFORM BUTTONS
@@ -153,10 +169,14 @@ def render_header():
 def render_platform_tabs():
     col1, col2 = st.columns(2)
     with col1:
+        active = (st.session_state.selected_platform == "YouTube")
+        btn_class = "youtube-active" if active else "youtube-inactive"
         if st.button("▶️ YouTube", key="yt_tab", use_container_width=True):
             st.session_state.selected_platform = "YouTube"
             st.rerun()
     with col2:
+        active = (st.session_state.selected_platform == "Instagram")
+        btn_class = "instagram-active" if active else "instagram-inactive"
         if st.button("📸 Instagram", key="ig_tab", use_container_width=True):
             st.session_state.selected_platform = "Instagram"
             st.rerun()
@@ -335,7 +355,7 @@ def render_schedule_form():
     st.markdown('</div>', unsafe_allow_html=True)
 
 # ============================================
-# POSTS, ANALYTICS, AI ASSISTANT
+# POSTS DISPLAY (with proper badges)
 # ============================================
 def render_posts():
     platform = st.session_state.selected_platform
@@ -346,88 +366,139 @@ def render_posts():
     else:
         for idx, post in enumerate(reversed(platform_posts)):
             time_str = post['scheduled_time'].strftime("%b %d, %Y • %I:%M %p")
-            badge = "scheduled" if post['status'] == 'scheduled' else ("posted" if post['status'] == 'posted' else "failed")
-            badge_class = f"badge-{badge}"
+            badge = post['status']
+            badge_class = "badge-scheduled" if badge == "scheduled" else ("badge-posted" if badge == "posted" else "badge-failed")
             st.markdown(f"""
             <div style="background: rgba(0,0,0,0.05); border-radius: 15px; padding: 1rem; margin-bottom: 0.8rem;">
-                <div style="display: flex; justify-content: space-between;">
-                    <div><strong>{post['title']}</strong><br><small>{time_str}</small></div>
-                    <div><span class="badge {badge_class}">{post['status'].upper()}</span></div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong>{post['title']}</strong><br>
+                        <small>📅 {time_str}</small>
+                    </div>
+                    <div>
+                        <span class="badge {badge_class}">{post['status'].upper()}</span>
+                    </div>
                 </div>
-                <div style="margin-top: 0.5rem;"><small>{post.get('description', '')[:80]}...</small></div>
+                <div style="margin-top: 0.5rem; color: #666;">
+                    <small>{post.get('description', 'No description')[:100]}...</small>
+                </div>
             </div>
             """, unsafe_allow_html=True)
+            
+            # Only show action buttons for scheduled posts
             if post['status'] == 'scheduled':
-                col1, col2 = st.columns([3,1])
+                col1, col2, col3 = st.columns([2,1,1])
                 with col2:
-                    if st.button("📤 Post Now", key=f"post_{idx}"):
+                    if st.button("📤 Post Now", key=f"post_now_{idx}"):
                         post['status'] = 'posted'
                         st.rerun()
-                    if st.button("🗑️ Delete", key=f"del_{idx}"):
+                with col3:
+                    if st.button("🗑️ Delete", key=f"delete_{idx}"):
                         st.session_state.posts.remove(post)
                         st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
+# ============================================
+# ANALYTICS
+# ============================================
 def render_analytics():
     import plotly.express as px
     st.markdown('<div class="card"><h3>📊 Analytics Dashboard</h3>', unsafe_allow_html=True)
     if not st.session_state.posts:
         st.info("No data available. Create posts to see analytics.")
+        st.markdown('</div>', unsafe_allow_html=True)
         return
-    df = pd.DataFrame([{'Platform': p['platform'], 'Status': p['status'], 'Niche': p.get('niche', 'General')} for p in st.session_state.posts])
+    
+    df_data = []
+    for p in st.session_state.posts:
+        df_data.append({
+            'Platform': p['platform'],
+            'Status': p['status'],
+            'Date': p['scheduled_time'].date() if p.get('scheduled_time') else None
+        })
+    df = pd.DataFrame(df_data)
+    
     col1, col2 = st.columns(2)
     with col1:
-        status_counts = df['Status'].value_counts()
-        fig = px.pie(values=status_counts.values, names=status_counts.index, title="Post Status", color_discrete_sequence=['#4CAF50','#FFC107','#F44336'])
-        st.plotly_chart(fig, use_container_width=True)
+        if not df.empty:
+            status_counts = df['Status'].value_counts()
+            fig = px.pie(values=status_counts.values, names=status_counts.index, title="Post Status", 
+                        color_discrete_sequence=['#FFC107', '#4CAF50', '#F44336'])
+            st.plotly_chart(fig, use_container_width=True)
     with col2:
-        platform_counts = df['Platform'].value_counts()
-        fig = px.bar(x=platform_counts.index, y=platform_counts.values, title="Posts by Platform", color=platform_counts.index)
-        st.plotly_chart(fig, use_container_width=True)
+        if not df.empty:
+            platform_counts = df['Platform'].value_counts()
+            fig = px.bar(x=platform_counts.index, y=platform_counts.values, title="Posts by Platform",
+                        color=platform_counts.index, color_discrete_sequence=['#FF0000', '#E4405F'])
+            st.plotly_chart(fig, use_container_width=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
+# ============================================
+# AI ASSISTANT
+# ============================================
 def render_ai_assistant():
     st.markdown('<div class="card"><h3>🤖 AI Content Assistant</h3>', unsafe_allow_html=True)
     col1, col2 = st.columns(2)
     with col1:
         platform = st.selectbox("Platform", ["YouTube", "Instagram"], key="ai_plat")
         niche = st.selectbox("Niche", ["General","Tech","Lifestyle","Fitness","Food","Art"], key="ai_niche")
-        topic = st.text_input("Topic/Title")
-        desc = st.text_area("Description")
+        topic = st.text_input("Topic/Title", placeholder="e.g., My new video about...")
+        desc = st.text_area("Description", placeholder="Tell me what your content is about...", height=100)
     with col2:
         if st.button("🎨 Generate Content Ideas", use_container_width=True):
-            with st.spinner("Creating..."):
+            with st.spinner("AI is creating amazing content for you..."):
                 cap = ai_model.generate_caption(platform, topic, desc, niche)
                 tags = ai_model.generate_hashtags(platform, niche)
                 times = ai_model.get_best_times(platform, niche, days_ahead=3)
-                st.markdown("### ✨ Generated Content")
-                st.success(f"**Caption:**\n{cap}")
-                st.info(f"**Hashtags:**\n{' '.join(tags)}")
-                st.markdown("**Best Times:**")
+                st.markdown("### ✨ AI Generated Content")
+                st.success(f"**📝 Caption:**\n{cap}")
+                st.info(f"**#️⃣ Hashtags:**\n{' '.join(tags)}")
+                st.markdown("**⏰ Best Times to Post:**")
                 for t in times[:3]:
                     st.markdown(f'<div class="best-time-card">📅 {t["label"]}<br>🔥 {t["score"]}% engagement</div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
 
 # ============================================
-# MAIN
+# ✅ FIX 2: MAIN with AUTO-REFRESH
 # ============================================
 def main():
-    # ✅ Check and flip any due posts to "posted"
-    check_and_update_posts()
-
+    # ✅ AUTO-REFRESH: Re-runs the app every 60 seconds (60000 milliseconds)
+    # This ensures scheduled posts get checked automatically
+    st_autorefresh(interval=60 * 1000, key="auto_refresh")
+    
+    # ✅ STATUS CHECK: Update any posts that have reached their scheduled time
+    posts_updated = check_and_update_posts()
+    
+    # Optional: Show a subtle notification when posts are auto-updated
+    if posts_updated:
+        st.toast("✨ Some scheduled posts have been automatically published!", icon="✅")
+    
+    # Inject CSS based on theme
     inject_css(st.session_state.theme)
+    
+    # Render header and navigation
     render_header()
     render_platform_tabs()
     render_stats()
-    menu = st.radio("", ["📝 Create Post", "📋 View Posts", "📊 Analytics", "🤖 AI Assistant"], horizontal=True, label_visibility="collapsed")
+    
+    # Main navigation menu
+    menu = st.radio("", ["📝 Create Post", "📋 View Posts", "📊 Analytics", "🤖 AI Assistant"], 
+                    horizontal=True, label_visibility="collapsed")
     st.markdown("---")
+    
+    # Render selected page
     if menu == "📝 Create Post":
-        col_left, col_right = st.columns([2,1])
-        with col_left: render_schedule_form()
-        with col_right: render_posts()
-    elif menu == "📋 View Posts": render_posts()
-    elif menu == "📊 Analytics": render_analytics()
-    else: render_ai_assistant()
+        col_left, col_right = st.columns([2, 1])
+        with col_left:
+            render_schedule_form()
+        with col_right:
+            render_posts()
+    elif menu == "📋 View Posts":
+        render_posts()
+    elif menu == "📊 Analytics":
+        render_analytics()
+    else:
+        render_ai_assistant()
 
 if __name__ == "__main__":
     main()
