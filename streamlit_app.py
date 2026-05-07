@@ -1,4 +1,3 @@
-"""
 OnePulse - Social Media Scheduler
 With custom month calendar and precise time picker (hours 1-12, minutes 0-59, AM/PM)
 """
@@ -9,7 +8,6 @@ from datetime import datetime, timedelta
 import random
 import sys
 import calendar as cal_mod
-from streamlit_autorefresh import st_autorefresh
 
 # Health check
 if len(sys.argv) > 1 and sys.argv[1] == "health":
@@ -124,19 +122,6 @@ if 'selected_minute' not in st.session_state: st.session_state.selected_minute =
 if 'selected_ampm' not in st.session_state: st.session_state.selected_ampm = "AM"
 
 # ============================================
-# BUG FIX: CHECK & UPDATE POST STATUSES
-# ============================================
-def check_and_update_posts():
-    now = datetime.now()
-    changed = False
-    for post in st.session_state.posts:
-        if post.get('status') == 'scheduled' and post.get('scheduled_time'):
-            if post['scheduled_time'] <= now:
-                post['status'] = 'posted'
-                changed = True
-    return changed
-
-# ============================================
 # HEADER & PLATFORM BUTTONS
 # ============================================
 def render_header():
@@ -186,6 +171,7 @@ def render_custom_datetime_picker():
     col_left, col_right = st.columns([2, 1], gap="large")
     with col_left:
         st.markdown("#### 📅 Select Date")
+        # Month navigation
         col_prev, col_month, col_next = st.columns([1,3,1])
         with col_prev:
             if st.button("◀", key="prev_month"):
@@ -210,11 +196,13 @@ def render_custom_datetime_picker():
                 st.session_state.cal_month = month
                 st.rerun()
 
+        # Weekday headers
         weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
         cols = st.columns(7)
         for i, day in enumerate(weekdays):
             cols[i].markdown(f"**{day}**", unsafe_allow_html=True)
 
+        # Day buttons
         cal = monthcalendar(year, month)
         for week in cal:
             cols = st.columns(7)
@@ -336,7 +324,7 @@ def render_schedule_form():
     st.markdown('</div>', unsafe_allow_html=True)
 
 # ============================================
-# POSTS, ANALYTICS, AI ASSISTANT
+# POSTS, ANALYTICS, AI ASSISTANT (keep same as before)
 # ============================================
 def render_posts():
     platform = st.session_state.selected_platform
@@ -413,12 +401,6 @@ def render_ai_assistant():
 # MAIN
 # ============================================
 def main():
-    # ✅ FIX 1: Auto-refresh every 60 seconds so scheduled posts get checked
-    st_autorefresh(interval=60 * 1000, key="auto_refresh")
-
-    # ✅ FIX 2: Check and flip any due posts to "posted"
-    check_and_update_posts()
-
     inject_css(st.session_state.theme)
     render_header()
     render_platform_tabs()
